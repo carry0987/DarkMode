@@ -14,7 +14,7 @@ class DarkMode {
     private darkModeToggleButton!: Element;
     private options!: DarkModeOptions;
     private defaults: DarkModeOptions = {
-        onChange: () => {},
+        onChange: (currentMode: string) => {},
         onDark: () => {},
         onLight: () => {},
         rootElement: document.documentElement,
@@ -24,7 +24,7 @@ class DarkMode {
     };
 
     // Methods for external use
-    private _onChange = () => {};
+    private _onChange = (currentMode: string) => {};
     private _onDark = () => {};
     private _onLight = () => {};
 
@@ -57,7 +57,7 @@ class DarkMode {
     }
 
     // Getters and setters
-    set onChange(callback: () => void) {
+    set onChange(callback: (currentMode: string) => void) {
         this._onChange = callback;
     }
 
@@ -100,7 +100,7 @@ class DarkMode {
             const newSetting = this.toggleCustomDarkMode();
             this.applyCustomDarkModeSettings(newSetting);
             if (newSetting) {
-                this._onChange();
+                this._onChange(newSetting as string);
                 if (newSetting === 'dark') {
                     this._onDark();
                 } else if (newSetting === 'light') {

@@ -1,6 +1,7 @@
 type DarkModeCallback = () => void;
+type DarkModeCallbackWithMode = (currentMode: string) => void;
 interface DarkModeOptions {
-    onChange?: DarkModeCallback;
+    onChange?: DarkModeCallbackWithMode;
     onDark?: DarkModeCallback;
     onLight?: DarkModeCallback;
     rootElement?: HTMLElement;
@@ -21,7 +22,7 @@ declare class DarkMode {
     private validColorModeKeys;
     private invertDarkModeObj;
     constructor(buttonSelector: string, options?: Partial<DarkModeOptions>);
-    set onChange(callback: () => void);
+    set onChange(callback: (currentMode: string) => void);
     set onDark(callback: () => void);
     set onLight(callback: () => void);
     /**

@@ -1,7 +1,8 @@
 type DarkModeCallback = () => void;
+type DarkModeCallbackWithMode = (currentMode: string) => void;
 
 export interface DarkModeOptions {
-    onChange?: DarkModeCallback;
+    onChange?: DarkModeCallbackWithMode;
     onDark?: DarkModeCallback;
     onLight?: DarkModeCallback;
     rootElement?: HTMLElement;

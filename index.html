@@ -36,8 +36,8 @@
                 console.log('onLight');
             }
         });
-        darkmode.onChange = () => {
-            console.log('onChanges');
+        darkmode.onChange = (currentMode) => {
+            console.log('onChange, current mode: ' + currentMode);
         };
     });
     </script>

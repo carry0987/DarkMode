@@ -70,11 +70,11 @@ function removeLocalValue(key) {
 
 class DarkMode {
     static instance = null;
-    static version = '1.0.1';
+    static version = '1.0.2';
     darkModeToggleButton;
     options;
     defaults = {
-        onChange: () => { },
+        onChange: (currentMode) => { },
         onDark: () => { },
         onLight: () => { },
         rootElement: document.documentElement,
@@ -83,7 +83,7 @@ class DarkMode {
         rootElementDarkModeAttributeName: 'data-user-color-scheme',
     };
     // Methods for external use
-    _onChange = () => { };
+    _onChange = (currentMode) => { };
     _onDark = () => { };
     _onLight = () => { };
     validColorModeKeys = {
@@ -144,7 +144,7 @@ class DarkMode {
             const newSetting = this.toggleCustomDarkMode();
             this.applyCustomDarkModeSettings(newSetting);
             if (newSetting) {
-                this._onChange();
+                this._onChange(newSetting);
                 if (newSetting === 'dark') {
                     this._onDark();
                 }
