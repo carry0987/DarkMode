@@ -86,8 +86,13 @@ class DarkMode {
     }
 
     private setupDarkMode() {
-        this.applyCustomDarkModeSettings();
+        const currentSetting = this.applyCustomDarkModeSettings();
         this.bindEvents();
+        if (currentSetting && currentSetting === 'dark') {
+            this._onDark();
+        } else {
+            this._onLight();
+        }
     }
 
     private bindEvents() {
@@ -120,7 +125,7 @@ class DarkMode {
         removeLocalValue(this.options.darkModeStorageKey!);
     }
 
-    private applyCustomDarkModeSettings(mode?: string): void {
+    private applyCustomDarkModeSettings(mode?: string): string {
         const currentSetting = mode || getLocalValue(this.options.darkModeStorageKey!);
 
         if (currentSetting === this.getModeFromCSSMediaQuery()) {
@@ -140,6 +145,8 @@ class DarkMode {
             );
             this.darkModeToggleButton.classList.add('dm-' + currentSetting);
         }
+
+        return currentSetting;
     }
 
     private toggleCustomDarkMode(): string | undefined {

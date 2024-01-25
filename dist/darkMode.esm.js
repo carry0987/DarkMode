@@ -70,7 +70,7 @@ function removeLocalValue(key) {
 
 class DarkMode {
     static instance = null;
-    static version = '1.0.0';
+    static version = '1.0.1';
     darkModeToggleButton;
     options;
     defaults = {
@@ -130,8 +130,14 @@ class DarkMode {
         console.log(`DarkMode is loaded, version: ${DarkMode.version}`);
     }
     setupDarkMode() {
-        this.applyCustomDarkModeSettings();
+        const currentSetting = this.applyCustomDarkModeSettings();
         this.bindEvents();
+        if (currentSetting && currentSetting === 'dark') {
+            this._onDark();
+        }
+        else {
+            this._onLight();
+        }
     }
     bindEvents() {
         this.darkModeToggleButton.addEventListener('click', () => {
@@ -174,6 +180,7 @@ class DarkMode {
             this.darkModeToggleButton.classList.remove('dm-' + this.invertDarkModeObj[currentSetting]);
             this.darkModeToggleButton.classList.add('dm-' + currentSetting);
         }
+        return currentSetting;
     }
     toggleCustomDarkMode() {
         let currentSetting = getLocalValue(this.options.darkModeStorageKey);
