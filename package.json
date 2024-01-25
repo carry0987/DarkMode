@@ -1,0 +1,44 @@
+{
+  "name": "@carry0987/darkmode",
+  "version": "1.0.0",
+  "description": "A simple and lightweight JavaScript library for dark mode toggle with localStorage support.",
+  "type": "module",
+  "main": "dist/darkMode.min.js",
+  "module": "dist/darkMode.esm.js",
+  "types": "dist/darkMode.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "rollup --config rollup.config.js",
+    "build": "rollup --config rollup.config.js --environment BUILD:production"
+  },
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/carry0987/DarkMode.git"
+  },
+  "keywords": [
+    "darkmode"
+  ],
+  "author": "carry0987",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/carry0987/DarkMode/issues"
+  },
+  "homepage": "https://github.com/carry0987/DarkMode#readme",
+  "devDependencies": {
+    "@carry0987/utils": "^3.2.1",
+    "@rollup/plugin-replace": "^5.0.5",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "rollup": "^4.9.6",
+    "rollup-plugin-delete": "^2.0.0",
+    "rollup-plugin-dts": "^6.1.0",
+    "tslib": "^2.6.2",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@rollup/plugin-node-resolve": "^15.2.3"
+  }
+}

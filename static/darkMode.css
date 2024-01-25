@@ -1,0 +1,67 @@
+@charset "UTF-8";
+
+:root {
+    --color-mode: "light";
+    --text: #333;
+    /*--link: #0366d6 !important;*/
+    --bg: #f5f5f5;
+    --lw: 0 0 12px 0 rgb(128 128 128);
+    --word: #24292e;
+    --list-hover: rgba(85, 85, 85, 0.7);
+    --list-hover-word: white;
+    --title-hover: white;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-mode: "dark";
+    }
+
+    :root:not([data-user-color-scheme]) {
+        --text: #fff;
+        --link: #ff8933 !important;
+        --bg: #121212;
+    }
+}
+
+[data-user-color-scheme="dark"] {
+    --text: #fff;
+    --link: #ff8933 !important;
+    --bg: #121212;
+    --th: #283142;
+    --lw: none;
+    --word: #727272;
+    --list-hover: rgb(56 76 86 / 70%);
+    --list-hover-word: #939393;
+    --title-hover: #419fff;
+}
+
+body {
+    color: var(--text);
+    background: var(--bg);
+}
+
+h1 {
+    color: var(--link);
+}
+
+.darkmode-switch {
+    cursor: pointer;
+    display: block;
+    font-size: 0;
+    line-height: 0;
+    text-decoration: none;
+    margin: 7px 5px;
+    padding: 0;
+    height: 21px;
+    width: 21px;
+    border: 0;
+    background: transparent url(darkmode.svg) no-repeat;
+    background-position: 0px -10px;
+}
+.dm-dark {
+    background-position: -23px -10px;
+}
+.dm-light {
+    background-position: 0px -10px;
+}
