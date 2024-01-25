@@ -155,23 +155,22 @@ class DarkMode {
         }
         return res === 'dark' ? 'dark' : 'light';
     }
-    resetRootDarkModeAttributeAndLS() {
+    resetRootDarkModeAttribute() {
         this.options.rootElement.removeAttribute(this.options.rootElementDarkModeAttributeName);
         removeLocalValue(this.options.darkModeStorageKey);
     }
     applyCustomDarkModeSettings(mode) {
         const currentSetting = mode || getLocalValue(this.options.darkModeStorageKey);
         if (currentSetting === this.getModeFromCSSMediaQuery()) {
-            this.resetRootDarkModeAttributeAndLS();
+            this.resetRootDarkModeAttribute();
         }
         else if (this.validColorModeKeys[currentSetting]) {
             this.options.rootElement.setAttribute(this.options.rootElementDarkModeAttributeName, currentSetting);
         }
         else {
-            this.resetRootDarkModeAttributeAndLS();
+            this.resetRootDarkModeAttribute();
         }
-        if (this.darkModeToggleButton &&
-            this.darkModeToggleButton instanceof Element) {
+        if (this.darkModeToggleButton && this.darkModeToggleButton instanceof Element) {
             this.darkModeToggleButton.classList.remove('dm-' + this.invertDarkModeObj[currentSetting]);
             this.darkModeToggleButton.classList.add('dm-' + currentSetting);
         }
@@ -182,8 +181,7 @@ class DarkMode {
             currentSetting = this.invertDarkModeObj[currentSetting];
         }
         else if (currentSetting === null) {
-            currentSetting =
-                this.invertDarkModeObj[this.getModeFromCSSMediaQuery()];
+            currentSetting = this.invertDarkModeObj[this.getModeFromCSSMediaQuery()];
         }
         else {
             return;

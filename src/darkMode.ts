@@ -115,7 +115,7 @@ class DarkMode {
         return res === 'dark' ? 'dark' : 'light';
     }
 
-    private resetRootDarkModeAttributeAndLS(): void {
+    private resetRootDarkModeAttribute(): void {
         this.options.rootElement!.removeAttribute(this.options.rootElementDarkModeAttributeName!);
         removeLocalValue(this.options.darkModeStorageKey!);
     }
@@ -124,20 +124,17 @@ class DarkMode {
         const currentSetting = mode || getLocalValue(this.options.darkModeStorageKey!);
 
         if (currentSetting === this.getModeFromCSSMediaQuery()) {
-            this.resetRootDarkModeAttributeAndLS();
+            this.resetRootDarkModeAttribute();
         } else if (this.validColorModeKeys[currentSetting]) {
             this.options.rootElement!.setAttribute(
                 this.options.rootElementDarkModeAttributeName!,
                 currentSetting
             );
         } else {
-            this.resetRootDarkModeAttributeAndLS();
+            this.resetRootDarkModeAttribute();
         }
 
-        if (
-            this.darkModeToggleButton &&
-            this.darkModeToggleButton instanceof Element
-        ) {
+        if (this.darkModeToggleButton && this.darkModeToggleButton instanceof Element) {
             this.darkModeToggleButton.classList.remove(
                 'dm-' + this.invertDarkModeObj[currentSetting]
             );
@@ -151,8 +148,7 @@ class DarkMode {
         if (this.validColorModeKeys[currentSetting]) {
             currentSetting = this.invertDarkModeObj[currentSetting];
         } else if (currentSetting === null) {
-            currentSetting =
-                this.invertDarkModeObj[this.getModeFromCSSMediaQuery()];
+            currentSetting = this.invertDarkModeObj[this.getModeFromCSSMediaQuery()];
         } else {
             return;
         }

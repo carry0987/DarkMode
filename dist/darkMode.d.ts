@@ -31,7 +31,7 @@ declare class DarkMode {
     private setupDarkMode;
     private bindEvents;
     private getModeFromCSSMediaQuery;
-    private resetRootDarkModeAttributeAndLS;
+    private resetRootDarkModeAttribute;
     private applyCustomDarkModeSettings;
     private toggleCustomDarkMode;
 }
