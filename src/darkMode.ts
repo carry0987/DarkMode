@@ -86,13 +86,22 @@ class DarkMode {
     }
 
     private setupDarkMode() {
-        const currentSetting = this.applyCustomDarkModeSettings();
-        this.bindEvents();
-        if (currentSetting && currentSetting === 'dark') {
+        let currentSetting = getLocalValue(this.options.darkModeStorageKey!);
+        if (currentSetting === null) {
+            currentSetting = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        this.applyCustomDarkModeSettings(currentSetting);
+        if (currentSetting === 'dark') {
             this._onDark();
         } else {
             this._onLight();
         }
+
+        // Bind events
+        this.bindEvents();
+
+        // Listen to system dark mode change
+        this.listenToSystemDarkModeChange();
     }
 
     private bindEvents() {
@@ -117,6 +126,7 @@ class DarkMode {
         if (res.length) {
             return res.replace(/\"/g, '').trim();
         }
+
         return res === 'dark' ? 'dark' : 'light';
     }
 
@@ -126,11 +136,9 @@ class DarkMode {
     }
 
     private applyCustomDarkModeSettings(mode?: string): string {
-        const currentSetting = mode || getLocalValue(this.options.darkModeStorageKey!);
+        const currentSetting = mode || getLocalValue(this.options.darkModeStorageKey!) || this.getModeFromCSSMediaQuery();
 
-        if (currentSetting === this.getModeFromCSSMediaQuery()) {
-            this.resetRootDarkModeAttribute();
-        } else if (this.validColorModeKeys[currentSetting]) {
+        if (this.validColorModeKeys[currentSetting]) {
             this.options.rootElement!.setAttribute(
                 this.options.rootElementDarkModeAttributeName!,
                 currentSetting
@@ -160,8 +168,26 @@ class DarkMode {
             return;
         }
 
+        // Save updated value to localStorage
         setLocalValue(this.options.darkModeStorageKey!, currentSetting);
+
         return currentSetting;
+    }
+
+    private listenToSystemDarkModeChange() {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            const hasCustomSetting = getLocalValue(this.options.darkModeStorageKey!);
+            if (hasCustomSetting === null) {
+                const newSetting = e.matches ? 'dark' : 'light';
+                this.applyCustomDarkModeSettings(newSetting);
+                this._onChange(newSetting);
+                if (newSetting === 'dark') {
+                    this._onDark();
+                } else {
+                    this._onLight();
+                }
+            }
+        });
     }
 }
 

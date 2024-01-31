@@ -35,6 +35,7 @@ declare class DarkMode {
     private resetRootDarkModeAttribute;
     private applyCustomDarkModeSettings;
     private toggleCustomDarkMode;
+    private listenToSystemDarkModeChange;
 }
 
 export { DarkMode as default };

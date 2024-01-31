@@ -70,7 +70,7 @@ function removeLocalValue(key) {
 
 class DarkMode {
     static instance = null;
-    static version = '1.0.2';
+    static version = '1.0.4';
     darkModeToggleButton;
     options;
     defaults = {
@@ -130,14 +130,21 @@ class DarkMode {
         console.log(`DarkMode is loaded, version: ${DarkMode.version}`);
     }
     setupDarkMode() {
-        const currentSetting = this.applyCustomDarkModeSettings();
-        this.bindEvents();
-        if (currentSetting && currentSetting === 'dark') {
+        let currentSetting = getLocalValue(this.options.darkModeStorageKey);
+        if (currentSetting === null) {
+            currentSetting = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        this.applyCustomDarkModeSettings(currentSetting);
+        if (currentSetting === 'dark') {
             this._onDark();
         }
         else {
             this._onLight();
         }
+        // Bind events
+        this.bindEvents();
+        // Listen to system dark mode change
+        this.listenToSystemDarkModeChange();
     }
     bindEvents() {
         this.darkModeToggleButton.addEventListener('click', () => {
@@ -166,11 +173,8 @@ class DarkMode {
         removeLocalValue(this.options.darkModeStorageKey);
     }
     applyCustomDarkModeSettings(mode) {
-        const currentSetting = mode || getLocalValue(this.options.darkModeStorageKey);
-        if (currentSetting === this.getModeFromCSSMediaQuery()) {
-            this.resetRootDarkModeAttribute();
-        }
-        else if (this.validColorModeKeys[currentSetting]) {
+        const currentSetting = mode || getLocalValue(this.options.darkModeStorageKey) || this.getModeFromCSSMediaQuery();
+        if (this.validColorModeKeys[currentSetting]) {
             this.options.rootElement.setAttribute(this.options.rootElementDarkModeAttributeName, currentSetting);
         }
         else {
@@ -193,8 +197,25 @@ class DarkMode {
         else {
             return;
         }
+        // Save updated value to localStorage
         setLocalValue(this.options.darkModeStorageKey, currentSetting);
         return currentSetting;
+    }
+    listenToSystemDarkModeChange() {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            const hasCustomSetting = getLocalValue(this.options.darkModeStorageKey);
+            if (hasCustomSetting === null) {
+                const newSetting = e.matches ? 'dark' : 'light';
+                this.applyCustomDarkModeSettings(newSetting);
+                this._onChange(newSetting);
+                if (newSetting === 'dark') {
+                    this._onDark();
+                }
+                else {
+                    this._onLight();
+                }
+            }
+        });
     }
 }
 
