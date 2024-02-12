@@ -17,6 +17,7 @@ class DarkMode {
         onChange: (currentMode: string) => {},
         onDark: () => {},
         onLight: () => {},
+        autoDetect: true,
         rootElement: document.documentElement,
         darkModeStorageKey: 'user-color-scheme',
         darkModeMediaQueryKey: '--color-mode',
@@ -24,9 +25,9 @@ class DarkMode {
     };
 
     // Methods for external use
-    private _onChange = (currentMode: string) => {};
-    private _onDark = () => {};
-    private _onLight = () => {};
+    private onChangeCallback = (currentMode: string) => {};
+    private onDarkCallback = () => {};
+    private onLightCallback = () => {};
 
     private validColorModeKeys: { [key: string]: boolean } = {
         dark: true,
@@ -58,15 +59,15 @@ class DarkMode {
 
     // Getters and setters
     set onChange(callback: (currentMode: string) => void) {
-        this._onChange = callback;
+        this.onChangeCallback = callback;
     }
 
     set onDark(callback: () => void) {
-        this._onDark = callback;
+        this.onDarkCallback = callback;
     }
 
     set onLight(callback: () => void) {
-        this._onLight = callback;
+        this.onLightCallback = callback;
     }
 
     /**
@@ -75,26 +76,26 @@ class DarkMode {
     init(element: Element, option: Partial<DarkModeOptions>): void {
         const userOptions = deepMerge(this.defaults, option);
 
-        this.options = userOptions as DarkModeOptions;
+        this.options = userOptions;
         this.darkModeToggleButton = element;
-        this._onChange = this.options.onChange || this._onChange;
-        this._onDark = this.options.onDark || this._onDark;
-        this._onLight = this.options.onLight || this._onLight;
+        this.onChangeCallback = this.options.onChange || this.onChangeCallback;
+        this.onDarkCallback = this.options.onDark || this.onDarkCallback;
+        this.onLightCallback = this.options.onLight || this.onLightCallback;
         this.setupDarkMode();
 
         console.log(`DarkMode is loaded, version: ${DarkMode.version}`);
     }
 
     private setupDarkMode() {
-        let currentSetting = getLocalValue(this.options.darkModeStorageKey!);
+        let currentSetting = getLocalValue(this.options.darkModeStorageKey);
         if (currentSetting === null) {
             currentSetting = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         }
         this.applyCustomDarkModeSettings(currentSetting);
         if (currentSetting === 'dark') {
-            this._onDark();
+            this.onDarkCallback();
         } else {
-            this._onLight();
+            this.onLightCallback();
         }
 
         // Bind events
@@ -109,19 +110,19 @@ class DarkMode {
             const newSetting = this.toggleCustomDarkMode();
             this.applyCustomDarkModeSettings(newSetting);
             if (newSetting) {
-                this._onChange(newSetting as string);
+                this.onChangeCallback(newSetting as string);
                 if (newSetting === 'dark') {
-                    this._onDark();
+                    this.onDarkCallback();
                 } else if (newSetting === 'light') {
-                    this._onLight();
+                    this.onLightCallback();
                 }
             }
         });
     }
 
     private getModeFromCSSMediaQuery(): string {
-        const res = getComputedStyle(this.options.rootElement!).getPropertyValue(
-            this.options.darkModeMediaQueryKey!
+        const res = getComputedStyle(this.options.rootElement).getPropertyValue(
+            this.options.darkModeMediaQueryKey
         );
         if (res.length) {
             return res.replace(/\"/g, '').trim();
@@ -131,16 +132,16 @@ class DarkMode {
     }
 
     private resetRootDarkModeAttribute(): void {
-        this.options.rootElement!.removeAttribute(this.options.rootElementDarkModeAttributeName!);
-        removeLocalValue(this.options.darkModeStorageKey!);
+        this.options.rootElement.removeAttribute(this.options.rootElementDarkModeAttributeName);
+        removeLocalValue(this.options.darkModeStorageKey);
     }
 
     private applyCustomDarkModeSettings(mode?: string): string {
-        const currentSetting = mode || getLocalValue(this.options.darkModeStorageKey!) || this.getModeFromCSSMediaQuery();
+        const currentSetting = mode || getLocalValue(this.options.darkModeStorageKey) || this.getModeFromCSSMediaQuery();
 
         if (this.validColorModeKeys[currentSetting]) {
-            this.options.rootElement!.setAttribute(
-                this.options.rootElementDarkModeAttributeName!,
+            this.options.rootElement.setAttribute(
+                this.options.rootElementDarkModeAttributeName,
                 currentSetting
             );
         } else {
@@ -158,7 +159,7 @@ class DarkMode {
     }
 
     private toggleCustomDarkMode(): string | undefined {
-        let currentSetting = getLocalValue(this.options.darkModeStorageKey!);
+        let currentSetting = getLocalValue(this.options.darkModeStorageKey);
 
         if (this.validColorModeKeys[currentSetting]) {
             currentSetting = this.invertDarkModeObj[currentSetting];
@@ -169,22 +170,22 @@ class DarkMode {
         }
 
         // Save updated value to localStorage
-        setLocalValue(this.options.darkModeStorageKey!, currentSetting);
+        setLocalValue(this.options.darkModeStorageKey, currentSetting);
 
         return currentSetting;
     }
 
     private listenToSystemDarkModeChange() {
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-            const hasCustomSetting = getLocalValue(this.options.darkModeStorageKey!);
+            const hasCustomSetting = getLocalValue(this.options.darkModeStorageKey);
             if (hasCustomSetting === null) {
                 const newSetting = e.matches ? 'dark' : 'light';
                 this.applyCustomDarkModeSettings(newSetting);
-                this._onChange(newSetting);
+                this.onChangeCallback(newSetting);
                 if (newSetting === 'dark') {
-                    this._onDark();
+                    this.onDarkCallback();
                 } else {
-                    this._onLight();
+                    this.onLightCallback();
                 }
             }
         });
