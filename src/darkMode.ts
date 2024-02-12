@@ -126,10 +126,7 @@ class DarkMode {
         const currentSetting = mode || getLocalValue(this.options.darkModeStorageKey) || this.getModeFromCSSMediaQuery();
 
         if (this.validColorModeKeys[currentSetting]) {
-            this.options.rootElement.setAttribute(
-                this.options.rootElementDarkModeAttributeName,
-                currentSetting
-            );
+            this.options.rootElement.setAttribute(this.options.rootElementDarkModeAttributeName, currentSetting);
         } else {
             this.resetRootDarkModeAttribute();
         }
@@ -175,6 +172,11 @@ class DarkMode {
                 }
             }
         });
+    }
+
+    // Public methods
+    public destroy(): void {
+        this.resetRootDarkModeAttribute();
     }
 
     // Getters and setters

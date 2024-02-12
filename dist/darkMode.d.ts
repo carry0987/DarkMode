@@ -34,6 +34,7 @@ declare class DarkMode {
     private applyCustomDarkModeSettings;
     private toggleCustomDarkMode;
     private listenToSystemDarkModeChange;
+    destroy(): void;
     set onChange(callback: (currentMode: string) => void);
     set onDark(callback: () => void);
     set onLight(callback: () => void);
