@@ -72,7 +72,7 @@ function removeLocalValue(key) {
 
 class DarkMode {
     static instance = null;
-    static version = '1.0.6';
+    static version = '1.0.7';
     darkModeToggleButton;
     options;
     defaults = {
@@ -80,6 +80,7 @@ class DarkMode {
         onDark: () => { },
         onLight: () => { },
         autoDetect: true,
+        preferSystem: false,
         rootElement: document.documentElement,
         darkModeStorageKey: 'user-color-scheme',
         darkModeMediaQueryKey: '--color-mode',
@@ -101,9 +102,12 @@ class DarkMode {
         if (DarkMode.instance) {
             return DarkMode.instance;
         }
-        const buttonElement = getElem(buttonSelector);
-        if (!buttonElement) {
-            throw new Error('ToggleButton could not be found with the selector provided.');
+        let buttonElement = null;
+        if (buttonSelector !== null) {
+            buttonElement = getElem(buttonSelector);
+            if (!buttonElement) {
+                throw new Error('ToggleButton could not be found with the selector provided.');
+            }
         }
         this.init(buttonElement, options);
         DarkMode.instance = this;
@@ -114,6 +118,7 @@ class DarkMode {
      */
     init(element, option) {
         const userOptions = deepMerge(this.defaults, option);
+        userOptions.autoDetect = !userOptions.preferSystem ? userOptions.autoDetect : true;
         this.options = userOptions;
         this.darkModeToggleButton = element;
         this.onChangeCallback = this.options.onChange || this.onChangeCallback;
@@ -123,9 +128,11 @@ class DarkMode {
         console.log(`DarkMode is loaded, version: ${DarkMode.version}`);
     }
     setupDarkMode() {
-        let currentSetting = getLocalValue(this.options.darkModeStorageKey);
+        if (this.options.preferSystem)
+            this.resetRootDarkModeAttribute();
+        let currentSetting = !this.options.preferSystem ? getLocalValue(this.options.darkModeStorageKey) : null;
         if (currentSetting === null && this.options.autoDetect) {
-            currentSetting = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            currentSetting = this.getModeFromSystemPreference();
         }
         else if (currentSetting === null) {
             currentSetting = 'light';
@@ -139,11 +146,13 @@ class DarkMode {
         }
         // Bind events
         this.bindEvents();
-        // Listen to system dark mode change
-        if (this.options.autoDetect)
+        // Listen to system dark mode change if autoDetect is enabled or preferSystem is true
+        if (this.options.autoDetect || this.options.preferSystem)
             this.listenToSystemDarkModeChange();
     }
     bindEvents() {
+        if (this.darkModeToggleButton === null)
+            return;
         this.darkModeToggleButton.addEventListener('click', () => {
             const newSetting = this.toggleCustomDarkMode();
             this.applyCustomDarkModeSettings(newSetting);
@@ -157,6 +166,9 @@ class DarkMode {
                 }
             }
         });
+    }
+    getModeFromSystemPreference() {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
     getModeFromCSSMediaQuery() {
         const res = getComputedStyle(this.options.rootElement).getPropertyValue(this.options.darkModeMediaQueryKey);

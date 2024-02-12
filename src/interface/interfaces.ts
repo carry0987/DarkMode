@@ -6,6 +6,7 @@ export interface DarkModeOptions {
     onDark: DarkModeCallback;
     onLight: DarkModeCallback;
     autoDetect: boolean;
+    preferSystem: boolean;
     rootElement: HTMLElement;
     darkModeStorageKey: string;
     darkModeMediaQueryKey: string;

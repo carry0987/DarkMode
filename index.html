@@ -22,6 +22,8 @@
     <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', () => {
         const darkmode = new DarkMode('#btn-toggle-dark', {
+            autoDetect: true,
+            preferSystem: false,
             rootElement: document.documentElement,
             darkModeStorageKey: 'user-color-scheme',
             darkModeMediaQueryKey: '--color-mode',

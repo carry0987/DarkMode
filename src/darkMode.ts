@@ -3,7 +3,7 @@ import {
     deepMerge,
     setLocalValue,
     getLocalValue,
-    removeLocalValue,
+    removeLocalValue
 } from '@carry0987/utils';
 import { DarkModeOptions } from './interface/interfaces';
 
@@ -11,13 +11,14 @@ class DarkMode {
     private static instance: DarkMode | null = null;
     private static version: string = '__version__';
 
-    private darkModeToggleButton!: Element;
+    private darkModeToggleButton!: Element | null;
     private options!: DarkModeOptions;
     private defaults: DarkModeOptions = {
         onChange: (currentMode: string) => {},
         onDark: () => {},
         onLight: () => {},
         autoDetect: true,
+        preferSystem: false,
         rootElement: document.documentElement,
         darkModeStorageKey: 'user-color-scheme',
         darkModeMediaQueryKey: '--color-mode',
@@ -39,14 +40,17 @@ class DarkMode {
         light: 'dark',
     };
 
-    constructor(buttonSelector: string, options: Partial<DarkModeOptions> = {}) {
+    constructor(buttonSelector: string | HTMLElement | null, options: Partial<DarkModeOptions> = {}) {
         if (DarkMode.instance) {
             return DarkMode.instance;
         }
 
-        const buttonElement = getElem(buttonSelector);
-        if (!buttonElement) {
-            throw new Error('ToggleButton could not be found with the selector provided.');
+        let buttonElement = null;
+        if (buttonSelector !== null) {
+            buttonElement = getElem(buttonSelector);
+            if (!buttonElement) {
+                throw new Error('ToggleButton could not be found with the selector provided.');
+            }
         }
 
         this.init(buttonElement, options);
@@ -57,9 +61,10 @@ class DarkMode {
     /**
      * Initialization
      */
-    private init(element: Element, option: Partial<DarkModeOptions>): void {
+    private init(element: Element | null, option: Partial<DarkModeOptions>): void {
         const userOptions = deepMerge(this.defaults, option);
 
+        userOptions.autoDetect = !userOptions.preferSystem ? userOptions.autoDetect : true;
         this.options = userOptions;
         this.darkModeToggleButton = element;
         this.onChangeCallback = this.options.onChange || this.onChangeCallback;
@@ -71,9 +76,10 @@ class DarkMode {
     }
 
     private setupDarkMode() {
-        let currentSetting = getLocalValue(this.options.darkModeStorageKey);
+        if (this.options.preferSystem) this.resetRootDarkModeAttribute();
+        let currentSetting = !this.options.preferSystem ? getLocalValue(this.options.darkModeStorageKey) : null;
         if (currentSetting === null && this.options.autoDetect) {
-            currentSetting = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            currentSetting = this.getModeFromSystemPreference();
         } else if (currentSetting === null) {
             currentSetting = 'light';
         }
@@ -87,11 +93,12 @@ class DarkMode {
         // Bind events
         this.bindEvents();
 
-        // Listen to system dark mode change
-        if (this.options.autoDetect) this.listenToSystemDarkModeChange();
+        // Listen to system dark mode change if autoDetect is enabled or preferSystem is true
+        if (this.options.autoDetect || this.options.preferSystem) this.listenToSystemDarkModeChange();
     }
 
     private bindEvents() {
+        if (this.darkModeToggleButton === null) return;
         this.darkModeToggleButton.addEventListener('click', () => {
             const newSetting = this.toggleCustomDarkMode();
             this.applyCustomDarkModeSettings(newSetting);
@@ -106,10 +113,12 @@ class DarkMode {
         });
     }
 
+    private getModeFromSystemPreference(): string {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
     private getModeFromCSSMediaQuery(): string {
-        const res = getComputedStyle(this.options.rootElement).getPropertyValue(
-            this.options.darkModeMediaQueryKey
-        );
+        const res = getComputedStyle(this.options.rootElement).getPropertyValue(this.options.darkModeMediaQueryKey);
         if (res.length) {
             return res.replace(/\"/g, '').trim();
         }

@@ -5,6 +5,7 @@ interface DarkModeOptions {
     onDark: DarkModeCallback;
     onLight: DarkModeCallback;
     autoDetect: boolean;
+    preferSystem: boolean;
     rootElement: HTMLElement;
     darkModeStorageKey: string;
     darkModeMediaQueryKey: string;
@@ -22,13 +23,14 @@ declare class DarkMode {
     private onLightCallback;
     private readonly validColorModeKeys;
     private readonly invertDarkModeObj;
-    constructor(buttonSelector: string, options?: Partial<DarkModeOptions>);
+    constructor(buttonSelector: string | HTMLElement | null, options?: Partial<DarkModeOptions>);
     /**
      * Initialization
      */
     private init;
     private setupDarkMode;
     private bindEvents;
+    private getModeFromSystemPreference;
     private getModeFromCSSMediaQuery;
     private resetRootDarkModeAttribute;
     private applyCustomDarkModeSettings;
