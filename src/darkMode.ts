@@ -29,25 +29,22 @@ class DarkMode {
     private onDarkCallback = () => {};
     private onLightCallback = () => {};
 
-    private validColorModeKeys: { [key: string]: boolean } = {
+    private readonly validColorModeKeys: Record<string, boolean> = {
         dark: true,
         light: true,
     };
 
-    private invertDarkModeObj: { [key: string]: string } = {
+    private readonly invertDarkModeObj: Record<string, string> = {
         dark: 'light',
         light: 'dark',
     };
 
-    constructor(
-        buttonSelector: string,
-        options: Partial<DarkModeOptions> = {}
-    ) {
+    constructor(buttonSelector: string, options: Partial<DarkModeOptions> = {}) {
         if (DarkMode.instance) {
             return DarkMode.instance;
         }
 
-        const buttonElement = getElem(buttonSelector) as Element | null;
+        const buttonElement = getElem(buttonSelector);
         if (!buttonElement) {
             throw new Error('ToggleButton could not be found with the selector provided.');
         }
@@ -57,23 +54,10 @@ class DarkMode {
         Object.seal(this);
     }
 
-    // Getters and setters
-    set onChange(callback: (currentMode: string) => void) {
-        this.onChangeCallback = callback;
-    }
-
-    set onDark(callback: () => void) {
-        this.onDarkCallback = callback;
-    }
-
-    set onLight(callback: () => void) {
-        this.onLightCallback = callback;
-    }
-
     /**
      * Initialization
      */
-    init(element: Element, option: Partial<DarkModeOptions>): void {
+    private init(element: Element, option: Partial<DarkModeOptions>): void {
         const userOptions = deepMerge(this.defaults, option);
 
         this.options = userOptions;
@@ -88,8 +72,10 @@ class DarkMode {
 
     private setupDarkMode() {
         let currentSetting = getLocalValue(this.options.darkModeStorageKey);
-        if (currentSetting === null) {
+        if (currentSetting === null && this.options.autoDetect) {
             currentSetting = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        } else if (currentSetting === null) {
+            currentSetting = 'light';
         }
         this.applyCustomDarkModeSettings(currentSetting);
         if (currentSetting === 'dark') {
@@ -102,7 +88,7 @@ class DarkMode {
         this.bindEvents();
 
         // Listen to system dark mode change
-        this.listenToSystemDarkModeChange();
+        if (this.options.autoDetect) this.listenToSystemDarkModeChange();
     }
 
     private bindEvents() {
@@ -189,6 +175,19 @@ class DarkMode {
                 }
             }
         });
+    }
+
+    // Getters and setters
+    public set onChange(callback: (currentMode: string) => void) {
+        this.onChangeCallback = callback;
+    }
+
+    public set onDark(callback: () => void) {
+        this.onDarkCallback = callback;
+    }
+
+    public set onLight(callback: () => void) {
+        this.onLightCallback = callback;
     }
 }
 

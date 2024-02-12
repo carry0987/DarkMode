@@ -1,13 +1,14 @@
 type DarkModeCallback = () => void;
 type DarkModeCallbackWithMode = (currentMode: string) => void;
 interface DarkModeOptions {
-    onChange?: DarkModeCallbackWithMode;
-    onDark?: DarkModeCallback;
-    onLight?: DarkModeCallback;
-    rootElement?: HTMLElement;
-    darkModeStorageKey?: string;
-    darkModeMediaQueryKey?: string;
-    rootElementDarkModeAttributeName?: string;
+    onChange: DarkModeCallbackWithMode;
+    onDark: DarkModeCallback;
+    onLight: DarkModeCallback;
+    autoDetect: boolean;
+    rootElement: HTMLElement;
+    darkModeStorageKey: string;
+    darkModeMediaQueryKey: string;
+    rootElementDarkModeAttributeName: string;
 }
 
 declare class DarkMode {
@@ -16,19 +17,16 @@ declare class DarkMode {
     private darkModeToggleButton;
     private options;
     private defaults;
-    private _onChange;
-    private _onDark;
-    private _onLight;
-    private validColorModeKeys;
-    private invertDarkModeObj;
+    private onChangeCallback;
+    private onDarkCallback;
+    private onLightCallback;
+    private readonly validColorModeKeys;
+    private readonly invertDarkModeObj;
     constructor(buttonSelector: string, options?: Partial<DarkModeOptions>);
-    set onChange(callback: (currentMode: string) => void);
-    set onDark(callback: () => void);
-    set onLight(callback: () => void);
     /**
      * Initialization
      */
-    init(element: Element, option: Partial<DarkModeOptions>): void;
+    private init;
     private setupDarkMode;
     private bindEvents;
     private getModeFromCSSMediaQuery;
@@ -36,6 +34,9 @@ declare class DarkMode {
     private applyCustomDarkModeSettings;
     private toggleCustomDarkMode;
     private listenToSystemDarkModeChange;
+    set onChange(callback: (currentMode: string) => void);
+    set onDark(callback: () => void);
+    set onLight(callback: () => void);
 }
 
 export { DarkMode as default };

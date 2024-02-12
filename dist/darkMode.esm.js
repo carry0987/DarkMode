@@ -3,6 +3,7 @@ function reportError(...error) {
 }
 
 function getElem(ele, mode, parent) {
+    // Return generic Element type or NodeList
     if (typeof ele !== 'string')
         return ele;
     let searchContext = document;
@@ -16,6 +17,7 @@ function getElem(ele, mode, parent) {
         searchContext = parent;
     }
     // If mode is 'all', search for all elements that match, otherwise, search for the first match
+    // Casting the result as E or NodeList
     return mode === 'all' ? searchContext.querySelectorAll(ele) : searchContext.querySelector(ele);
 }
 function isObject(item) {
@@ -70,22 +72,23 @@ function removeLocalValue(key) {
 
 class DarkMode {
     static instance = null;
-    static version = '1.0.4';
+    static version = '1.0.5';
     darkModeToggleButton;
     options;
     defaults = {
         onChange: (currentMode) => { },
         onDark: () => { },
         onLight: () => { },
+        autoDetect: true,
         rootElement: document.documentElement,
         darkModeStorageKey: 'user-color-scheme',
         darkModeMediaQueryKey: '--color-mode',
         rootElementDarkModeAttributeName: 'data-user-color-scheme',
     };
     // Methods for external use
-    _onChange = (currentMode) => { };
-    _onDark = () => { };
-    _onLight = () => { };
+    onChangeCallback = (currentMode) => { };
+    onDarkCallback = () => { };
+    onLightCallback = () => { };
     validColorModeKeys = {
         dark: true,
         light: true,
@@ -106,16 +109,6 @@ class DarkMode {
         DarkMode.instance = this;
         Object.seal(this);
     }
-    // Getters and setters
-    set onChange(callback) {
-        this._onChange = callback;
-    }
-    set onDark(callback) {
-        this._onDark = callback;
-    }
-    set onLight(callback) {
-        this._onLight = callback;
-    }
     /**
      * Initialization
      */
@@ -123,40 +116,44 @@ class DarkMode {
         const userOptions = deepMerge(this.defaults, option);
         this.options = userOptions;
         this.darkModeToggleButton = element;
-        this._onChange = this.options.onChange || this._onChange;
-        this._onDark = this.options.onDark || this._onDark;
-        this._onLight = this.options.onLight || this._onLight;
+        this.onChangeCallback = this.options.onChange || this.onChangeCallback;
+        this.onDarkCallback = this.options.onDark || this.onDarkCallback;
+        this.onLightCallback = this.options.onLight || this.onLightCallback;
         this.setupDarkMode();
         console.log(`DarkMode is loaded, version: ${DarkMode.version}`);
     }
     setupDarkMode() {
         let currentSetting = getLocalValue(this.options.darkModeStorageKey);
-        if (currentSetting === null) {
+        if (currentSetting === null && this.options.autoDetect) {
             currentSetting = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        else if (currentSetting === null) {
+            currentSetting = 'light';
         }
         this.applyCustomDarkModeSettings(currentSetting);
         if (currentSetting === 'dark') {
-            this._onDark();
+            this.onDarkCallback();
         }
         else {
-            this._onLight();
+            this.onLightCallback();
         }
         // Bind events
         this.bindEvents();
         // Listen to system dark mode change
-        this.listenToSystemDarkModeChange();
+        if (this.options.autoDetect)
+            this.listenToSystemDarkModeChange();
     }
     bindEvents() {
         this.darkModeToggleButton.addEventListener('click', () => {
             const newSetting = this.toggleCustomDarkMode();
             this.applyCustomDarkModeSettings(newSetting);
             if (newSetting) {
-                this._onChange(newSetting);
+                this.onChangeCallback(newSetting);
                 if (newSetting === 'dark') {
-                    this._onDark();
+                    this.onDarkCallback();
                 }
                 else if (newSetting === 'light') {
-                    this._onLight();
+                    this.onLightCallback();
                 }
             }
         });
@@ -207,15 +204,25 @@ class DarkMode {
             if (hasCustomSetting === null) {
                 const newSetting = e.matches ? 'dark' : 'light';
                 this.applyCustomDarkModeSettings(newSetting);
-                this._onChange(newSetting);
+                this.onChangeCallback(newSetting);
                 if (newSetting === 'dark') {
-                    this._onDark();
+                    this.onDarkCallback();
                 }
                 else {
-                    this._onLight();
+                    this.onLightCallback();
                 }
             }
         });
+    }
+    // Getters and setters
+    set onChange(callback) {
+        this.onChangeCallback = callback;
+    }
+    set onDark(callback) {
+        this.onDarkCallback = callback;
+    }
+    set onLight(callback) {
+        this.onLightCallback = callback;
     }
 }
 
