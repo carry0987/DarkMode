@@ -72,10 +72,11 @@ function removeLocalValue(key) {
 
 class DarkMode {
     static instance = null;
-    static version = '1.0.7';
+    static version = '1.1.0';
     darkModeToggleButton;
     options;
     defaults = {
+        buttonSelector: null,
         onChange: (currentMode) => { },
         onDark: () => { },
         onLight: () => { },
@@ -98,10 +99,20 @@ class DarkMode {
         dark: 'light',
         light: 'dark',
     };
-    constructor(buttonSelector, options = {}) {
+    constructor(options = {}) {
         if (DarkMode.instance) {
             return DarkMode.instance;
         }
+        this.init(options);
+        DarkMode.instance = this;
+        Object.seal(this);
+    }
+    /**
+     * Initialization
+     */
+    init(option) {
+        const userOptions = deepMerge(this.defaults, option);
+        const { buttonSelector } = userOptions;
         let buttonElement = null;
         if (buttonSelector !== null) {
             buttonElement = getElem(buttonSelector);
@@ -109,18 +120,9 @@ class DarkMode {
                 throw new Error('ToggleButton could not be found with the selector provided.');
             }
         }
-        this.init(buttonElement, options);
-        DarkMode.instance = this;
-        Object.seal(this);
-    }
-    /**
-     * Initialization
-     */
-    init(element, option) {
-        const userOptions = deepMerge(this.defaults, option);
         userOptions.autoDetect = !userOptions.preferSystem ? userOptions.autoDetect : true;
         this.options = userOptions;
-        this.darkModeToggleButton = element;
+        this.darkModeToggleButton = buttonElement;
         this.onChangeCallback = this.options.onChange || this.onChangeCallback;
         this.onDarkCallback = this.options.onDark || this.onDarkCallback;
         this.onLightCallback = this.options.onLight || this.onLightCallback;
@@ -229,6 +231,26 @@ class DarkMode {
     // Public methods
     destroy() {
         this.resetRootDarkModeAttribute();
+    }
+    /**
+     * Switch directly to a specified mode
+     * @param mode The color mode to switch to ('dark' or 'light')
+     */
+    switchMode(mode) {
+        if (!this.validColorModeKeys[mode])
+            return;
+        const updatedSetting = this.applyCustomDarkModeSettings(mode);
+        if (updatedSetting) {
+            this.onChangeCallback(updatedSetting);
+            if (updatedSetting === 'dark') {
+                this.onDarkCallback();
+            }
+            else {
+                this.onLightCallback();
+            }
+            // Save the new setting to localStorage
+            setLocalValue(this.options.darkModeStorageKey, updatedSetting);
+        }
     }
     // Getters and setters
     set onChange(callback) {
