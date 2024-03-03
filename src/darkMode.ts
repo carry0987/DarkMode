@@ -60,7 +60,11 @@ class DarkMode {
 
         let buttonElement = null;
         if (buttonSelector !== null) {
-            buttonElement = getElem(buttonSelector);
+            if (buttonSelector instanceof HTMLElement) {
+                buttonElement = buttonSelector;
+            } else {
+                buttonElement = getElem(buttonSelector);
+            }
             if (!buttonElement) {
                 throw new Error('ToggleButton could not be found with the selector provided.');
             }

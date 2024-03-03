@@ -4,8 +4,12 @@ function reportError(...error) {
 
 function getElem(ele, mode, parent) {
     // Return generic Element type or NodeList
-    if (typeof ele !== 'string')
+    if (typeof ele !== 'string') {
+        if (mode === 'all') {
+            return [ele];
+        }
         return ele;
+    }
     let searchContext = document;
     if (mode === null && parent) {
         searchContext = parent;
@@ -72,7 +76,7 @@ function removeLocalValue(key) {
 
 class DarkMode {
     static instance = null;
-    static version = '1.1.0';
+    static version = '1.1.1';
     darkModeToggleButton;
     options;
     defaults = {
@@ -115,7 +119,12 @@ class DarkMode {
         const { buttonSelector } = userOptions;
         let buttonElement = null;
         if (buttonSelector !== null) {
-            buttonElement = getElem(buttonSelector);
+            if (buttonSelector instanceof HTMLElement) {
+                buttonElement = buttonSelector;
+            }
+            else {
+                buttonElement = getElem(buttonSelector);
+            }
             if (!buttonElement) {
                 throw new Error('ToggleButton could not be found with the selector provided.');
             }
