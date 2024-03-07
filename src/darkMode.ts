@@ -229,4 +229,5 @@ class DarkMode {
     }
 }
 
-export default DarkMode;
+export { DarkMode as default };
+export * from './interface/interfaces';

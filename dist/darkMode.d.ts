@@ -48,4 +48,4 @@ declare class DarkMode {
     set onLight(callback: () => void);
 }
 
-export { DarkMode as default };
+export { type DarkModeOptions, DarkMode as default };
