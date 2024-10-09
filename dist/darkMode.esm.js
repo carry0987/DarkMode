@@ -5,9 +5,6 @@ function reportError(...error) {
 function getElem(ele, mode, parent) {
     // Return generic Element type or NodeList
     if (typeof ele !== 'string') {
-        if (mode === 'all') {
-            return [ele];
-        }
         return ele;
     }
     let searchContext = document;
@@ -25,7 +22,10 @@ function getElem(ele, mode, parent) {
     return mode === 'all' ? searchContext.querySelectorAll(ele) : searchContext.querySelector(ele);
 }
 function isObject(item) {
-    return typeof item === 'object' && item !== null && !Array.isArray(item);
+    return typeof item === 'object' && item !== null && !isArray(item);
+}
+function isArray(item) {
+    return Array.isArray(item);
 }
 function deepMerge(target, ...sources) {
     if (!sources.length)
@@ -37,9 +37,9 @@ function deepMerge(target, ...sources) {
                 const sourceKey = key;
                 const value = source[sourceKey];
                 const targetKey = key;
-                if (isObject(value)) {
+                if (isObject(value) || isArray(value)) {
                     if (!target[targetKey] || typeof target[targetKey] !== 'object') {
-                        target[targetKey] = {};
+                        target[targetKey] = isArray(value) ? [] : {};
                     }
                     deepMerge(target[targetKey], value);
                 }
@@ -76,7 +76,7 @@ function removeLocalValue(key) {
 
 class DarkMode {
     static instance = null;
-    static version = '1.1.3';
+    static version = '1.2.0';
     darkModeToggleButton;
     options;
     defaults = {
@@ -89,7 +89,7 @@ class DarkMode {
         rootElement: document.documentElement,
         darkModeStorageKey: 'user-color-scheme',
         darkModeMediaQueryKey: '--color-mode',
-        rootElementDarkModeAttributeName: 'data-user-color-scheme',
+        rootElementDarkModeAttributeName: 'data-user-color-scheme'
     };
     // Methods for external use
     onChangeCallback = (currentMode) => { };
@@ -97,11 +97,11 @@ class DarkMode {
     onLightCallback = () => { };
     validColorModeKeys = {
         dark: true,
-        light: true,
+        light: true
     };
     invertDarkModeObj = {
         dark: 'light',
-        light: 'dark',
+        light: 'dark'
     };
     constructor(options = {}) {
         if (DarkMode.instance) {
@@ -222,7 +222,7 @@ class DarkMode {
         return currentSetting;
     }
     listenToSystemDarkModeChange() {
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
             const hasCustomSetting = getLocalValue(this.options.darkModeStorageKey);
             if (hasCustomSetting === null) {
                 const newSetting = e.matches ? 'dark' : 'light';
@@ -273,4 +273,12 @@ class DarkMode {
     }
 }
 
-export { DarkMode as default };
+var interfaces = /*#__PURE__*/Object.freeze({
+    __proto__: null
+});
+
+var types = /*#__PURE__*/Object.freeze({
+    __proto__: null
+});
+
+export { DarkMode, interfaces as DarkModeInterface, types as DarkModeType };

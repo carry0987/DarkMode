@@ -1,5 +1,12 @@
 type DarkModeCallback = () => void;
 type DarkModeCallbackWithMode = (currentMode: string) => void;
+
+type types_DarkModeCallback = DarkModeCallback;
+type types_DarkModeCallbackWithMode = DarkModeCallbackWithMode;
+declare namespace types {
+  export type { types_DarkModeCallback as DarkModeCallback, types_DarkModeCallbackWithMode as DarkModeCallbackWithMode };
+}
+
 interface DarkModeOptions {
     buttonSelector: string | HTMLElement | null;
     onChange: DarkModeCallbackWithMode;
@@ -11,6 +18,11 @@ interface DarkModeOptions {
     darkModeStorageKey: string;
     darkModeMediaQueryKey: string;
     rootElementDarkModeAttributeName: string;
+}
+
+type interfaces_DarkModeOptions = DarkModeOptions;
+declare namespace interfaces {
+  export type { interfaces_DarkModeOptions as DarkModeOptions };
 }
 
 declare class DarkMode {
@@ -48,4 +60,4 @@ declare class DarkMode {
     set onLight(callback: () => void);
 }
 
-export { type DarkModeOptions, DarkMode as default };
+export { DarkMode, interfaces as DarkModeInterface, types as DarkModeType };

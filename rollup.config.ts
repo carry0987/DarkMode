@@ -1,31 +1,35 @@
+import { RollupOptions } from 'rollup';
 import typescript from '@rollup/plugin-typescript';
 import terser from '@rollup/plugin-terser';
 import replace from '@rollup/plugin-replace';
-import resolve from '@rollup/plugin-node-resolve';
+import tsConfigPaths from 'rollup-plugin-tsconfig-paths';
+import nodeResolve from '@rollup/plugin-node-resolve';
 import { dts } from 'rollup-plugin-dts';
 import del from 'rollup-plugin-delete';
 import { createRequire } from 'module';
+
 const pkg = createRequire(import.meta.url)('./package.json');
-
 const isProduction = process.env.BUILD === 'production';
+const sourceFile = 'src/index.ts';
 
-const jsConfig = {
-    input: 'src/darkMode.ts',
+const jsConfig: RollupOptions = {
+    input: sourceFile,
     output: [
         {
-            file: pkg.main,
+            file: pkg.exports['.']['umd'],
             format: 'umd',
-            name: 'DarkMode',
+            name: 'darkModejs',
             plugins: isProduction ? [terser()] : []
         },
         {
-            file: pkg.module,
+            file: pkg.exports['.']['import'],
             format: 'es'
         }
     ],
     plugins: [
         typescript(),
-        resolve(),
+        tsConfigPaths(),
+        nodeResolve(),
         replace({
             preventAssignment: true,
             __version__: pkg.version
@@ -33,15 +37,16 @@ const jsConfig = {
     ]
 };
 
-const dtsConfig = {
-    input: 'dist/darkMode.d.ts',
+const dtsConfig: RollupOptions = {
+    input: sourceFile,
     output: {
-        file: pkg.types,
+        file: pkg.exports['.']['types'],
         format: 'es'
     },
     plugins: [
+        tsConfigPaths(),
         dts(),
-        del({ hook: 'buildEnd', targets: ['!dist/index.js', 'dist/*.d.ts', 'dist/interface'] })
+        del({ hook: 'buildEnd', targets: ['dist/dts'] })
     ]
 };
 

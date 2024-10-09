@@ -1,11 +1,5 @@
-import {
-    getElem,
-    deepMerge,
-    setLocalValue,
-    getLocalValue,
-    removeLocalValue
-} from '@carry0987/utils';
-import { DarkModeOptions } from './interface/interfaces';
+import { getElem, deepMerge, setLocalValue, getLocalValue, removeLocalValue } from '@carry0987/utils';
+import { DarkModeOptions } from '@/interface/interfaces';
 
 class DarkMode {
     private static instance: DarkMode | null = null;
@@ -23,7 +17,7 @@ class DarkMode {
         rootElement: document.documentElement,
         darkModeStorageKey: 'user-color-scheme',
         darkModeMediaQueryKey: '--color-mode',
-        rootElementDarkModeAttributeName: 'data-user-color-scheme',
+        rootElementDarkModeAttributeName: 'data-user-color-scheme'
     };
 
     // Methods for external use
@@ -33,12 +27,12 @@ class DarkMode {
 
     private readonly validColorModeKeys: Record<string, boolean> = {
         dark: true,
-        light: true,
+        light: true
     };
 
     private readonly invertDarkModeObj: Record<string, string> = {
         dark: 'light',
-        light: 'dark',
+        light: 'dark'
     };
 
     constructor(options: Partial<DarkModeOptions> = {}) {
@@ -138,7 +132,8 @@ class DarkMode {
     }
 
     private applyCustomDarkModeSettings(mode?: string): string {
-        const currentSetting = mode || getLocalValue(this.options.darkModeStorageKey) || this.getModeFromCSSMediaQuery();
+        const currentSetting =
+            mode || getLocalValue(this.options.darkModeStorageKey) || this.getModeFromCSSMediaQuery();
 
         if (this.validColorModeKeys[currentSetting]) {
             this.options.rootElement.setAttribute(this.options.rootElementDarkModeAttributeName, currentSetting);
@@ -147,9 +142,7 @@ class DarkMode {
         }
 
         if (this.darkModeToggleButton && this.darkModeToggleButton instanceof Element) {
-            this.darkModeToggleButton.classList.remove(
-                'dm-' + this.invertDarkModeObj[currentSetting]
-            );
+            this.darkModeToggleButton.classList.remove('dm-' + this.invertDarkModeObj[currentSetting]);
             this.darkModeToggleButton.classList.add('dm-' + currentSetting);
         }
 
@@ -174,7 +167,7 @@ class DarkMode {
     }
 
     private listenToSystemDarkModeChange() {
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
             const hasCustomSetting = getLocalValue(this.options.darkModeStorageKey);
             if (hasCustomSetting === null) {
                 const newSetting = e.matches ? 'dark' : 'light';
@@ -229,5 +222,4 @@ class DarkMode {
     }
 }
 
-export { DarkMode as default };
-export * from './interface/interfaces';
+export { DarkMode };

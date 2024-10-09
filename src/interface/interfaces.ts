@@ -1,5 +1,4 @@
-type DarkModeCallback = () => void;
-type DarkModeCallbackWithMode = (currentMode: string) => void;
+import { DarkModeCallback, DarkModeCallbackWithMode } from '@/type/types';
 
 export interface DarkModeOptions {
     buttonSelector: string | HTMLElement | null;
