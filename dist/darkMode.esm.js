@@ -76,7 +76,7 @@ function removeLocalValue(key) {
 
 class DarkMode {
     static instance = null;
-    static version = '1.2.0';
+    static version = '1.2.1';
     darkModeToggleButton;
     options;
     defaults = {
